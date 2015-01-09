@@ -16,21 +16,40 @@ namespace SYF_Client
     public OpenCV OpenCV;
     public TcpClientSockets TcpSockets;
 
+    String UserName;
+
     public void InitializeRuntime()
     { 
       OpenCV = new OpenCV();
       TcpSockets = new TcpClientSockets();
 
-      TcpSockets.Initialize(); 
+      // get current username
+      UserName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+
+      SingleInstance();
     }
 
-    public void saveBitmap(Bitmap bmp)
-    { 
-      
+    // verify user by fingerprint
+    public string VerifiyUserByFinger()
+    {
+      //return TcpSockets.FingerMessage(UserName, );
+      return "nananana batman";
     }
 
+    // verify user by faceImage
+    public string VerifiyUserByPic()
+    {
+      return TcpSockets.FaceMessage(UserName, OpenCV.CreateBmp());
+    }
 
-    public void SingleInstance()
+    // verify by password
+    public string VerifiyUserByPassword(string password)
+    {
+      return TcpSockets.PasswordMessage(UserName, password);
+    }
+
+    // check for multi Instance
+    private void SingleInstance()
     {
       try
       {

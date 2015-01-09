@@ -3,6 +3,7 @@ using log4net;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -20,8 +21,8 @@ namespace SYF_Client
     Capture cap;
     Thread CaptureThread;
     PictureBox picBox; // picBox Mainwindow
-    
-    bool draw = true;
+
+    bool draw = true; // falls sich größe von fenster verändert
     private const int Framerate = 30;
     private const int Framewidth = 1920;
     private const int Frameheight = 1080;
@@ -31,7 +32,19 @@ namespace SYF_Client
     public void Initialize(PictureBox pictureBox)
     {
       picBox = pictureBox;
-      startWebcam();
+      InitializeComponents();
+    }
+
+    public void InitializeComponents()
+    {
+      cap = new Capture(0);
+
+      picBox.SizeMode = PictureBoxSizeMode.Zoom;
+      
+      CaptureThread = new Thread(CapThreadFunction);
+      cap.ImageGrabbed += new EventHandler(imageGrabbed);
+
+      CaptureThread.Start();
     }
 
     void UpdateImage(Bitmap bmp)
@@ -39,6 +52,7 @@ namespace SYF_Client
       if (draw)
       {
         picBox.Image = bmp;
+        cap.Stop();
         picBox.Refresh();
       }
     }
@@ -83,16 +97,43 @@ namespace SYF_Client
       }
     }
 
-    public void startWebcam()
+    public Byte[] CreateBmp()
     {
-      cap = new Capture(0);
+      try
+      {
+        using (var frame = cap.RetrieveBgrFrame().Copy())
+        {
+          using (Bitmap bmp = frame.ToBitmap())
+          {
+            picBox.Image = bmp;
+            picBox.Refresh();
 
-      picBox.SizeMode = PictureBoxSizeMode.Zoom;
+            //cap.ImageGrabbed -= new EventHandler(imageGrabbed);
+            //CaptureThread.Suspend(); // new one doesn't work!
+            MemoryStream m = new MemoryStream();
+            bmp.Save(m, System.Drawing.Imaging.ImageFormat.Jpeg);
 
-      cap.ImageGrabbed += new EventHandler(imageGrabbed);
+            CloseCam();
+            //string location = "C:\\Users\\dsalmer.DRGT\\Desktop\\test.bmp";
+            //bmp.Save(location);
 
-      CaptureThread = new Thread(CapThreadFunction);
-      CaptureThread.Start();
+            return m.ToArray();
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        log.Debug(ex);
+        return new Byte[0];
+      }
+    }
+
+    public void CloseCam()
+    {
+      cap.Stop();
+      cap.ImageGrabbed -= new EventHandler(imageGrabbed);
+      //CaptureThread.Abort();
+      cap.Dispose();
     }
     #endregion
   }

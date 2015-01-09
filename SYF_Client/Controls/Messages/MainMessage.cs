@@ -1,0 +1,76 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using SYF_Client.Controls.Messages;
+using SYF_Server.Messages;
+
+namespace SYF_Client.Controls
+{
+  public partial class MainMessage : UserControl
+  {
+    public string Password;
+    public MessageType Type;
+
+    public event MessageOkHandler MessageOk;
+    public event MessageCancelHandler MessageCancel;
+
+    protected virtual void OnOk()
+    {
+      MessageOkHandler handler = MessageOk;
+      if (handler != null) handler(this);
+    }
+    
+    protected virtual void OnCancel()
+    {
+      MessageCancelHandler handler = MessageCancel;
+      if (handler != null) handler(this);
+    }
+
+    public MainMessage(MessageType type)
+    {
+      InitializeComponent();
+      Type = type;
+      btnCancel.Text = "Abbrechen";
+      tlpMainMessage.RowStyles[2].Height = 0;
+      tbPassword.Visible = false;
+
+      // set messagetype 
+      switch (type)
+      {
+        case MessageType.FaceImage:
+          lblMessage.Text = "Einen moment Geduld ihr Bild wird überprüft";
+          break;
+        case MessageType.Fingerprint:
+          lblMessage.Text = "Bitte fahren Sie mit dem Finger über den Sensor";
+          break;
+        case MessageType.Text:
+          this.tlpMainMessage.RowStyles[2].Height = 35;
+          tbPassword.Visible = true;
+          break;
+        case MessageType.Error:
+          lblMessage.Text = "Authentifizierung fehlgeschlagen";
+          btnCancel.Text = "Ok";
+          break;       
+        default:
+          lblMessage.Text = "Bitte einen moment Geduld";
+          break;
+      }
+    }
+
+    private void btnCancel_Click(object sender, EventArgs e)
+    {
+      OnCancel();
+    }
+
+    private void btnSend_Click(object sender, EventArgs e)
+    {
+      Password = tbPassword.Text;
+      OnOk();
+    }
+  }
+}

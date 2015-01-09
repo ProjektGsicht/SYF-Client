@@ -28,39 +28,104 @@
         /// </summary>
         private void InitializeComponent()
         {
+      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
       this.picBox = new System.Windows.Forms.PictureBox();
-      this.button1 = new System.Windows.Forms.Button();
+      this.btnFingerprint = new System.Windows.Forms.Button();
+      this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+      this.btnPassword = new System.Windows.Forms.Button();
+      this.btnPic = new System.Windows.Forms.Button();
       ((System.ComponentModel.ISupportInitialize)(this.picBox)).BeginInit();
+      this.tableLayoutPanel1.SuspendLayout();
       this.SuspendLayout();
       // 
       // picBox
       // 
-      this.picBox.Location = new System.Drawing.Point(0, 0);
+      this.tableLayoutPanel1.SetColumnSpan(this.picBox, 5);
+      this.picBox.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.picBox.Image = ((System.Drawing.Image)(resources.GetObject("picBox.Image")));
+      this.picBox.Location = new System.Drawing.Point(53, 16);
       this.picBox.Name = "picBox";
-      this.picBox.Size = new System.Drawing.Size(544, 424);
+      this.picBox.Size = new System.Drawing.Size(442, 361);
       this.picBox.TabIndex = 0;
       this.picBox.TabStop = false;
       // 
-      // button1
+      // btnFingerprint
       // 
-      this.button1.Location = new System.Drawing.Point(72, 432);
-      this.button1.Name = "button1";
-      this.button1.Size = new System.Drawing.Size(75, 23);
-      this.button1.TabIndex = 1;
-      this.button1.Text = "button1";
-      this.button1.UseVisualStyleBackColor = true;
-      this.button1.Click += new System.EventHandler(this.button1_Click);
+      this.btnFingerprint.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+      this.btnFingerprint.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.btnFingerprint.Location = new System.Drawing.Point(142, 412);
+      this.btnFingerprint.Name = "btnFingerprint";
+      this.btnFingerprint.Size = new System.Drawing.Size(84, 25);
+      this.btnFingerprint.TabIndex = 1;
+      this.btnFingerprint.Text = "fingerprint";
+      this.btnFingerprint.UseVisualStyleBackColor = true;
+      this.btnFingerprint.Click += new System.EventHandler(this.btnFingerprint_Click);
+      // 
+      // tableLayoutPanel1
+      // 
+      this.tableLayoutPanel1.ColumnCount = 7;
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 50F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 90F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 90F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 90F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 50F));
+      this.tableLayoutPanel1.Controls.Add(this.picBox, 1, 1);
+      this.tableLayoutPanel1.Controls.Add(this.btnPassword, 4, 3);
+      this.tableLayoutPanel1.Controls.Add(this.btnFingerprint, 2, 3);
+      this.tableLayoutPanel1.Controls.Add(this.btnPic, 3, 2);
+      this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+      this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+      this.tableLayoutPanel1.RowCount = 5;
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 3.456221F));
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 96.54378F));
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 31F));
+      this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 34F));
+      this.tableLayoutPanel1.Size = new System.Drawing.Size(549, 475);
+      this.tableLayoutPanel1.TabIndex = 2;
+      // 
+      // btnPassword
+      // 
+      this.btnPassword.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.btnPassword.Location = new System.Drawing.Point(322, 412);
+      this.btnPassword.Name = "btnPassword";
+      this.btnPassword.Size = new System.Drawing.Size(84, 25);
+      this.btnPassword.TabIndex = 3;
+      this.btnPassword.Text = "password";
+      this.btnPassword.UseVisualStyleBackColor = true;
+      this.btnPassword.Click += new System.EventHandler(this.btnPassword_Click);
+      // 
+      // btnPic
+      // 
+      this.btnPic.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.btnPic.Location = new System.Drawing.Point(232, 383);
+      this.btnPic.Name = "btnPic";
+      this.btnPic.Size = new System.Drawing.Size(84, 23);
+      this.btnPic.TabIndex = 2;
+      this.btnPic.Text = "take photo";
+      this.btnPic.UseVisualStyleBackColor = true;
+      this.btnPic.Click += new System.EventHandler(this.btnPic_Click);
       // 
       // MainWindow
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(549, 475);
-      this.Controls.Add(this.button1);
-      this.Controls.Add(this.picBox);
+      this.ControlBox = false;
+      this.Controls.Add(this.tableLayoutPanel1);
+      this.MaximizeBox = false;
+      this.MinimizeBox = false;
       this.Name = "MainWindow";
+      this.ShowIcon = false;
+      this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
       this.Text = "Form1";
+      this.TopMost = true;
+      this.Resize += new System.EventHandler(this.MainWindow_Resize);
       ((System.ComponentModel.ISupportInitialize)(this.picBox)).EndInit();
+      this.tableLayoutPanel1.ResumeLayout(false);
       this.ResumeLayout(false);
 
         }
@@ -68,7 +133,10 @@
         #endregion
 
         private System.Windows.Forms.PictureBox picBox;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnFingerprint;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.Button btnPic;
+        private System.Windows.Forms.Button btnPassword;
     }
 }
 

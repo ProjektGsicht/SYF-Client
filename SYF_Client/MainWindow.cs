@@ -1,23 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using log4net;
-using log4net.Config;
-using System.Xml;
 using System.Reflection;
 using SYF_Client.Properties;
 using System.IO;
 using log4net.Repository;
 using log4net.Appender;
-using Emgu.CV;
-using System.Threading;
-
+using SYF_Client.Controls;
+using System.Drawing;
+using System.Diagnostics;
 
 namespace SYF_Client
 {
@@ -30,21 +22,33 @@ namespace SYF_Client
 
     public Runtime Runtime { get; set; }
 
+    private UserControl MessageControl { get; set; }
+    private Message Message { get; set; }
+
+    private NotifyIcon notifyIcon = new NotifyIcon();
+ 
     public MainWindow()
     {
       InitializeLogging(Settings.Default.LogFilePath);
 
       InitializeComponent();
+      //this.notifyIcon.Icon = ((System.Drawing.Icon)(Resources.ResourceManager.GetObject("logo_header.png")));
+      this.notifyIcon.Icon = SystemIcons.Application;
+      
+      // No Borders
+      //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+      //this.WindowState = FormWindowState.Maximized;
+      //this.Bounds = Screen.FromControl(this).Bounds;
 
+      // Initialize Runtime
       Runtime = new Runtime();
-
-      Runtime.SingleInstance();
       Runtime.InitializeRuntime();
       Runtime.OpenCV.Initialize(picBox);
 
+      ContextMenue();
     }
 
-    //Logging
+    // logging
     public static void InitializeLogging(string logDirectory)
     {
       Assembly assembly = Assembly.GetExecutingAssembly();
@@ -78,10 +82,146 @@ namespace SYF_Client
       }
     }
 
-    private void button1_Click(object sender, EventArgs e)
+    // unlock windows
+    private void OpenWindows(string response)
     {
+      HideMessage();
       
+      if (string.IsNullOrEmpty(response))
+      {
+        // open windows
+        this.WindowState = FormWindowState.Minimized;
+      }
+      else
+      {
+        var messageControl = new MainMessage(SYF_Server.Messages.MessageType.Error);
+      }
     }
 
+    // start verification with fingerprint
+    private void btnFingerprint_Click(object sender, EventArgs e)
+    {
+      // start fingerprint
+      var messageControl = new MainMessage(SYF_Server.Messages.MessageType.Fingerprint);
+      ShowMessage(messageControl);
+
+      // OpenWindows(Runtime.)
+    }
+
+    // start verification with faceimage
+    private void btnPic_Click(object sender, EventArgs e)
+    {
+      var messageControl = new MainMessage(SYF_Server.Messages.MessageType.FaceImage);
+      ShowMessage(messageControl);
+
+      Update();
+
+      OpenWindows(Runtime.VerifiyUserByPic());
+    }
+
+    // start verification with password
+    private void btnPassword_Click(object sender, EventArgs e)
+    {
+      var messageControl = new MainMessage(SYF_Server.Messages.MessageType.Text);
+      ShowMessage(messageControl);
+    }
+
+    // close current message
+    public void HideMessage()
+    {
+      if (MessageControl != null)
+      {
+        Controls.Remove(MessageControl);
+        MessageControl = null;
+      }
+    }
+
+    // show message
+    public void ShowMessage(MainMessage msg)
+    {
+      MessageControl = msg;
+      Controls.Add(msg);
+
+      msg.MessageCancel += msg_MessageCancel;
+      msg.MessageOk += msg_MessageOk;
+
+      msg.Left = (this.ClientSize.Width - msg.Width) / 2;
+      msg.Top = this.ClientSize.Height - msg.Height;
+
+      msg.BringToFront();
+      msg.Focus();
+
+      // close webcam
+      if (msg.Type != SYF_Server.Messages.MessageType.FaceImage)
+      {
+        Runtime.OpenCV.CloseCam();
+      }
+    }
+
+    // MessageOk handler only for password verification 
+    void msg_MessageOk(object sender)
+    {
+      HideMessage();
+
+      var mainMessage = (MainMessage)sender;
+      OpenWindows(Runtime.VerifiyUserByPassword(mainMessage.Password));
+
+      var messageControl = new MainMessage(0);
+      ShowMessage(messageControl);
+    }
+
+    void msg_MessageCancel(object sender)
+    {
+      //Controls.Remove(MessageControl);
+      //MessageControl = null;
+
+      //// restart webcam
+      //Runtime.OpenCV.InitializeComponents();
+
+      HideMessage();
+      Runtime = new Runtime();
+      Runtime.InitializeRuntime();
+      Runtime.OpenCV.Initialize(picBox);
+    }
+
+    // form to tray notification
+    private void MainWindow_Resize(object sender, EventArgs e)
+    {
+      if (FormWindowState.Minimized == this.WindowState)
+      {
+        notifyIcon.Visible = true;
+        //notifyIcon.ShowBalloonTip(500);
+        this.Hide();
+      }
+      else if (FormWindowState.Normal == this.WindowState)
+      {
+        notifyIcon.Visible = false;
+        Runtime.OpenCV.InitializeComponents();
+      }
+    }
+
+    private void ContextMenue()
+    {
+      ContextMenu cm = new ContextMenu();
+      MenuItem item = new MenuItem();
+
+      item.Text = "Webpage";
+      item.Index = 1;
+      item.Click += new EventHandler(item_Click);
+      cm.MenuItems.Add(item);
+
+      notifyIcon.ContextMenu = cm;
+      notifyIcon.DoubleClick += new EventHandler(NotifyIconDoubleClick);
+    }
+
+    void item_Click(object sender, EventArgs e)
+    {
+      Process.Start("http://google.com");
+    }
+
+    void NotifyIconDoubleClick(object sender, EventArgs e)
+    {
+
+    }
   }
 }

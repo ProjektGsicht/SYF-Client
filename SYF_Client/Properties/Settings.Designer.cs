@@ -34,7 +34,7 @@ namespace SYF_Client.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("localhost")]
         public string ServerIp {
             get {
                 return ((string)(this["ServerIp"]));
@@ -43,7 +43,7 @@ namespace SYF_Client.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("12345")]
         public int ServerPort {
             get {
                 return ((int)(this["ServerPort"]));
