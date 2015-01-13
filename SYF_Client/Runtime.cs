@@ -1,4 +1,5 @@
 ﻿using log4net;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -20,13 +21,29 @@ namespace SYF_Client
 
     public void InitializeRuntime()
     { 
-      OpenCV = new OpenCV();
+      //OpenCV = new OpenCV();
       TcpSockets = new TcpClientSockets();
 
       // get current username
       UserName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
 
+      SystemEvents.SessionSwitch += SystemEvents_SessionSwitch;
+
+
       SingleInstance();
+    }
+
+    void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)
+    {
+      // Application.Restart();
+      if (e.Reason == SessionSwitchReason.SessionLock)
+      {
+        System.Windows.Forms.MessageBox.Show("SessionLock");
+      }
+      if (e.Reason == SessionSwitchReason.SessionUnlock)
+      {
+        System.Windows.Forms.MessageBox.Show("SessionUnlock");
+      }
     }
 
     // verify user by fingerprint
@@ -37,9 +54,10 @@ namespace SYF_Client
     }
 
     // verify user by faceImage
-    public string VerifiyUserByPic()
+    public string VerifiyUserByPic(byte[] pic)
     {
-      return TcpSockets.FaceMessage(UserName, OpenCV.CreateBmp());
+      //return TcpSockets.FaceMessage(UserName, OpenCV.CreateBmp());
+      return TcpSockets.FaceMessage(UserName, pic);
     }
 
     // verify by password

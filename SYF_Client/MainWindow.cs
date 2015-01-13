@@ -34,6 +34,7 @@ namespace SYF_Client
       InitializeComponent();
       //this.notifyIcon.Icon = ((System.Drawing.Icon)(Resources.ResourceManager.GetObject("logo_header.png")));
       this.notifyIcon.Icon = SystemIcons.Application;
+      //notifyIcon.DoubleClick += new EventHandler(NotifyIconDoubleClick);
       
       // No Borders
       //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
@@ -43,7 +44,10 @@ namespace SYF_Client
       // Initialize Runtime
       Runtime = new Runtime();
       Runtime.InitializeRuntime();
-      Runtime.OpenCV.Initialize(picBox);
+      //Runtime.OpenCV.Initialize(picBox);
+
+      //new
+      picBox.StartWebcam();
 
       ContextMenue();
     }
@@ -55,6 +59,7 @@ namespace SYF_Client
       FileInfo fInfo = new FileInfo(Log4NetConfigFileName);
       log4net.Config.XmlConfigurator.Configure();
 
+      // get properties
       log4net.GlobalContext.Properties["assembly"] = assembly.GetName().Name;
       log4net.GlobalContext.Properties["version"] = assembly.GetName().Version;
       log4net.GlobalContext.Properties["os"] = System.Environment.OSVersion.VersionString;
@@ -83,14 +88,17 @@ namespace SYF_Client
     }
 
     // unlock windows
-    private void OpenWindows(string response)
+    private void UnlockWindows(string response)
     {
       HideMessage();
       
       if (string.IsNullOrEmpty(response))
       {
-        // open windows
-        this.WindowState = FormWindowState.Minimized;
+       // unlock windows
+        picBox.StopWebcam();
+        picBox.Dispose();
+        
+        WindowState = FormWindowState.Minimized;
       }
       else
       {
@@ -105,7 +113,8 @@ namespace SYF_Client
       var messageControl = new MainMessage(SYF_Server.Messages.MessageType.Fingerprint);
       ShowMessage(messageControl);
 
-      // OpenWindows(Runtime.)
+      Update();
+
     }
 
     // start verification with faceimage
@@ -116,7 +125,7 @@ namespace SYF_Client
 
       Update();
 
-      OpenWindows(Runtime.VerifiyUserByPic());
+      UnlockWindows(Runtime.VerifiyUserByPic(picBox.takePic()));
     }
 
     // start verification with password
@@ -133,6 +142,8 @@ namespace SYF_Client
       {
         Controls.Remove(MessageControl);
         MessageControl = null;
+
+        //Update();
       }
     }
 
@@ -154,7 +165,7 @@ namespace SYF_Client
       // close webcam
       if (msg.Type != SYF_Server.Messages.MessageType.FaceImage)
       {
-        Runtime.OpenCV.CloseCam();
+        //Runtime.OpenCV.CloseCam();
       }
     }
 
@@ -164,7 +175,7 @@ namespace SYF_Client
       HideMessage();
 
       var mainMessage = (MainMessage)sender;
-      OpenWindows(Runtime.VerifiyUserByPassword(mainMessage.Password));
+      UnlockWindows(Runtime.VerifiyUserByPassword(mainMessage.Password));
 
       var messageControl = new MainMessage(0);
       ShowMessage(messageControl);
@@ -179,9 +190,9 @@ namespace SYF_Client
       //Runtime.OpenCV.InitializeComponents();
 
       HideMessage();
-      Runtime = new Runtime();
-      Runtime.InitializeRuntime();
-      Runtime.OpenCV.Initialize(picBox);
+      //Runtime = new Runtime();
+      //Runtime.InitializeRuntime();
+      //Runtime.OpenCV.Initialize(picBox);
     }
 
     // form to tray notification
@@ -193,10 +204,14 @@ namespace SYF_Client
         //notifyIcon.ShowBalloonTip(500);
         this.Hide();
       }
-      else if (FormWindowState.Normal == this.WindowState)
+      else if (FormWindowState.Normal == this.WindowState || FormWindowState.Maximized == this.WindowState)
       {
         notifyIcon.Visible = false;
-        Runtime.OpenCV.InitializeComponents();
+        picBox = new WebCamPictureBox();
+        picBox.StartWebcam();
+
+        //picBox.StartWebcam();
+        // Runtime.OpenCV.InitializeComponents();
       }
     }
 
@@ -221,7 +236,22 @@ namespace SYF_Client
 
     void NotifyIconDoubleClick(object sender, EventArgs e)
     {
+      if (this.IsDisposed)
+      { 
+        
+      }
 
+      // Activate the form.
+      this.Show();
+      //this.BringToFront();
+      //this.Update();
+      //Activate();
+      //this.WindowState = FormWindowState.Maximized;
+    }
+
+    private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
+    {
+      notifyIcon.Icon = null;
     }
   }
 }

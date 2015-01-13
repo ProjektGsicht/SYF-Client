@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -14,15 +15,19 @@ namespace SYF_Client.Controls
     Capture cap;
     Thread CaptureThread;
 
-    bool draw = true; // falls sich größe von fenster verändert
+    Bitmap secureBmp;
+    bool draw; // falls sich größe von fenster verändert
     private const int Framerate = 30;
     private const int Framewidth = 1920;
     private const int Frameheight = 1080;
 
+    private Object synclock = new Object();
+
     delegate void DelUpdateImage(Bitmap bmp);
 
-    public void StartWebCam()
+    public void StartWebcam()
     {
+      draw = true;
       cap = new Capture(0);
 
       SizeMode = PictureBoxSizeMode.Zoom;
@@ -33,11 +38,32 @@ namespace SYF_Client.Controls
       CaptureThread.Start();
     }
 
+    public void StopWebcam()
+    {
+      draw = false;
+      cap.ImageGrabbed -= new EventHandler(imageGrabbed);
+      cap.Stop();
+      CaptureThread.Suspend();
+    }
+
+    public Byte[] takePic()
+    {
+      MemoryStream m = new MemoryStream();
+      lock (synclock)
+      {
+        // Thread.Sleep(1000);
+        secureBmp.Save(m, System.Drawing.Imaging.ImageFormat.Jpeg);
+        m.Close();
+      }
+      return m.ToArray();
+    }
+
     void UpdateImage(Bitmap bmp)
     {
       if (draw)
       {
         Image = bmp;
+
         cap.Stop();
         Refresh();
       }
@@ -51,13 +77,17 @@ namespace SYF_Client.Controls
         {
           using (Bitmap bmp = frame.ToBitmap())
           {
-            if (InvokeRequired)
+            lock (synclock)
             {
-              Invoke(new DelUpdateImage(UpdateImage), bmp);
-            }
-            else
-            {
-              UpdateImage(bmp);
+              secureBmp = (Bitmap)bmp.Clone();
+              if (InvokeRequired)
+              {
+                Invoke(new DelUpdateImage(UpdateImage), bmp);
+              }
+              else
+              {
+                UpdateImage(bmp);
+              }
             }
           }
         }
