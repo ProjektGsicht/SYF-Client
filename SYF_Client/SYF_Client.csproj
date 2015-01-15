@@ -103,6 +103,7 @@
     <Compile Include="Controls\WebCamPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="KeyboardFilter.cs" />
     <Compile Include="MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -10,6 +10,7 @@ using log4net.Appender;
 using SYF_Client.Controls;
 using System.Drawing;
 using System.Diagnostics;
+using Microsoft.Win32;
 
 namespace SYF_Client
 {
@@ -26,31 +27,37 @@ namespace SYF_Client
     private Message Message { get; set; }
 
     private NotifyIcon notifyIcon = new NotifyIcon();
+    private bool isActive;
  
     public MainWindow()
     {
       InitializeLogging(Settings.Default.LogFilePath);
-
+      isActive = true;
+      SystemEvents.SessionSwitch += SystemEvents_SessionSwitch;
       InitializeComponent();
-      //this.notifyIcon.Icon = ((System.Drawing.Icon)(Resources.ResourceManager.GetObject("logo_header.png")));
-      this.notifyIcon.Icon = SystemIcons.Application;
-      //notifyIcon.DoubleClick += new EventHandler(NotifyIconDoubleClick);
       
       // No Borders
-      //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-      //this.WindowState = FormWindowState.Maximized;
-      //this.Bounds = Screen.FromControl(this).Bounds;
+      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+      this.WindowState = FormWindowState.Maximized;
+      this.Bounds = Screen.FromControl(this).Bounds;
 
       // Initialize Runtime
       Runtime = new Runtime();
       Runtime.InitializeRuntime();
-      //Runtime.OpenCV.Initialize(picBox);
 
-      //new
       picBox.StartWebcam();
-
       ContextMenue();
     }
+
+    // filter keys
+    readonly KeyboardFilter kbFilter = new KeyboardFilter(new Keys[] 
+        { 
+            Keys.LWin | Keys.D,
+            Keys.RWin | Keys.D, 
+            Keys.LWin | Keys.X, 
+            Keys.RWin | Keys.X,
+            Keys.Alt | Keys.F4
+        });
 
     // logging
     public static void InitializeLogging(string logDirectory)
@@ -87,6 +94,26 @@ namespace SYF_Client
       }
     }
 
+    // session watch
+    void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)
+    {
+      if (isActive)
+      {
+        // Application.Restart();
+        if (e.Reason == SessionSwitchReason.SessionLock)
+        {
+          log.Debug("SessionLock");
+        }
+        if (e.Reason == SessionSwitchReason.SessionUnlock)
+        {
+          this.Show();
+          this.WindowState = FormWindowState.Maximized;
+          this.TopMost = true;
+          log.Debug("SessionUnlock");
+        }
+      }
+    }
+
     // unlock windows
     private void UnlockWindows(string response)
     {
@@ -94,10 +121,7 @@ namespace SYF_Client
       
       if (string.IsNullOrEmpty(response))
       {
-       // unlock windows
         picBox.StopWebcam();
-        picBox.Dispose();
-        
         WindowState = FormWindowState.Minimized;
       }
       else
@@ -106,7 +130,7 @@ namespace SYF_Client
       }
     }
 
-    // start verification with fingerprint
+    // verification with fingerprint
     private void btnFingerprint_Click(object sender, EventArgs e)
     {
       // start fingerprint
@@ -161,12 +185,6 @@ namespace SYF_Client
 
       msg.BringToFront();
       msg.Focus();
-
-      // close webcam
-      if (msg.Type != SYF_Server.Messages.MessageType.FaceImage)
-      {
-        //Runtime.OpenCV.CloseCam();
-      }
     }
 
     // MessageOk handler only for password verification 
@@ -183,16 +201,7 @@ namespace SYF_Client
 
     void msg_MessageCancel(object sender)
     {
-      //Controls.Remove(MessageControl);
-      //MessageControl = null;
-
-      //// restart webcam
-      //Runtime.OpenCV.InitializeComponents();
-
       HideMessage();
-      //Runtime = new Runtime();
-      //Runtime.InitializeRuntime();
-      //Runtime.OpenCV.Initialize(picBox);
     }
 
     // form to tray notification
@@ -200,6 +209,7 @@ namespace SYF_Client
     {
       if (FormWindowState.Minimized == this.WindowState)
       {
+        KeyboardFilter.isMinimized = true;
         notifyIcon.Visible = true;
         //notifyIcon.ShowBalloonTip(500);
         this.Hide();
@@ -207,51 +217,77 @@ namespace SYF_Client
       else if (FormWindowState.Normal == this.WindowState || FormWindowState.Maximized == this.WindowState)
       {
         notifyIcon.Visible = false;
-        picBox = new WebCamPictureBox();
-        picBox.StartWebcam();
-
-        //picBox.StartWebcam();
-        // Runtime.OpenCV.InitializeComponents();
+        KeyboardFilter.isMinimized = false;
       }
     }
 
     private void ContextMenue()
     {
-      ContextMenu cm = new ContextMenu();
-      MenuItem item = new MenuItem();
+      //this.notifyIcon.Icon = ((System.Drawing.Icon)(Resources.ResourceManager.GetObject("logo_header.png")));
+      this.notifyIcon.Icon = SystemIcons.Application;
 
-      item.Text = "Webpage";
-      item.Index = 1;
-      item.Click += new EventHandler(item_Click);
-      cm.MenuItems.Add(item);
+      ContextMenu cm = new ContextMenu();
+
+      MenuItem stateItem = new MenuItem();
+      MenuItem webpageItem = new MenuItem();
+      MenuItem closeItem = new MenuItem();
+
+      stateItem.Text = "Deaktivieren";
+      stateItem.Index = 0;
+      stateItem.Click += stateItem_Click;
+      cm.MenuItems.Add(stateItem);
+
+      webpageItem.Text = "Webpage";
+      webpageItem.Index = 1;
+      webpageItem.Click += webpage_Click;
+      cm.MenuItems.Add(webpageItem);
+
+      closeItem.Text = "Close";
+      closeItem.Index = 3;
+      closeItem.Click += closeItem_Click;
 
       notifyIcon.ContextMenu = cm;
       notifyIcon.DoubleClick += new EventHandler(NotifyIconDoubleClick);
     }
 
-    void item_Click(object sender, EventArgs e)
+    void stateItem_Click(object sender, EventArgs e)
+    {
+      MenuItem stateItem = sender as MenuItem;
+      
+      if (isActive)
+      {
+        stateItem.Text = "Deaktivieren";
+        isActive = true;
+      }
+      else
+      {
+        stateItem.Text = "Aktivieren";
+        isActive = false;
+      }
+    }
+
+    void webpage_Click(object sender, EventArgs e)
     {
       Process.Start("http://google.com");
     }
 
+    void closeItem_Click(object sender, EventArgs e)
+    {
+      notifyIcon.Icon = null;
+      this.FormClosing -= new System.Windows.Forms.FormClosingEventHandler(this.MainWindow_FormClosing);
+      this.Close();
+    }
+
     void NotifyIconDoubleClick(object sender, EventArgs e)
     {
-      if (this.IsDisposed)
-      { 
-        
-      }
-
-      // Activate the form.
       this.Show();
-      //this.BringToFront();
-      //this.Update();
-      //Activate();
-      //this.WindowState = FormWindowState.Maximized;
+      this.WindowState = FormWindowState.Maximized;
+      picBox.StartWebcam();
     }
 
     private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
     {
-      notifyIcon.Icon = null;
+      e.Cancel = true;
     }
   }
 }

@@ -41,7 +41,7 @@
       // 
       this.btnFingerprint.DialogResult = System.Windows.Forms.DialogResult.Cancel;
       this.btnFingerprint.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.btnFingerprint.Location = new System.Drawing.Point(142, 412);
+      this.btnFingerprint.Location = new System.Drawing.Point(380, 705);
       this.btnFingerprint.Name = "btnFingerprint";
       this.btnFingerprint.Size = new System.Drawing.Size(84, 25);
       this.btnFingerprint.TabIndex = 1;
@@ -52,13 +52,13 @@
       // tableLayoutPanel1
       // 
       this.tableLayoutPanel1.ColumnCount = 7;
-      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 50F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 90F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 90F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 90F));
       this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 51F));
+      this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
       this.tableLayoutPanel1.Controls.Add(this.btnPassword, 4, 3);
       this.tableLayoutPanel1.Controls.Add(this.btnFingerprint, 2, 3);
       this.tableLayoutPanel1.Controls.Add(this.btnPic, 3, 2);
@@ -72,13 +72,13 @@
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 29F));
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 31F));
       this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 34F));
-      this.tableLayoutPanel1.Size = new System.Drawing.Size(549, 475);
+      this.tableLayoutPanel1.Size = new System.Drawing.Size(1024, 768);
       this.tableLayoutPanel1.TabIndex = 2;
       // 
       // btnPassword
       // 
       this.btnPassword.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.btnPassword.Location = new System.Drawing.Point(322, 412);
+      this.btnPassword.Location = new System.Drawing.Point(560, 705);
       this.btnPassword.Name = "btnPassword";
       this.btnPassword.Size = new System.Drawing.Size(84, 25);
       this.btnPassword.TabIndex = 3;
@@ -89,7 +89,7 @@
       // btnPic
       // 
       this.btnPic.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.btnPic.Location = new System.Drawing.Point(232, 383);
+      this.btnPic.Location = new System.Drawing.Point(470, 676);
       this.btnPic.Name = "btnPic";
       this.btnPic.Size = new System.Drawing.Size(84, 23);
       this.btnPic.TabIndex = 2;
@@ -101,9 +101,9 @@
       // 
       this.tableLayoutPanel1.SetColumnSpan(this.picBox, 5);
       this.picBox.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.picBox.Location = new System.Drawing.Point(53, 16);
+      this.picBox.Location = new System.Drawing.Point(153, 26);
       this.picBox.Name = "picBox";
-      this.picBox.Size = new System.Drawing.Size(442, 361);
+      this.picBox.Size = new System.Drawing.Size(718, 644);
       this.picBox.TabIndex = 4;
       this.picBox.TabStop = false;
       // 
@@ -111,9 +111,10 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(549, 475);
+      this.ClientSize = new System.Drawing.Size(1024, 768);
       this.ControlBox = false;
       this.Controls.Add(this.tableLayoutPanel1);
+      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
       this.MaximizeBox = false;
       this.MinimizeBox = false;
       this.Name = "MainWindow";

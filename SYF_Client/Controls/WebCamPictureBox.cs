@@ -22,18 +22,21 @@ namespace SYF_Client.Controls
     private const int Frameheight = 1080;
 
     private Object synclock = new Object();
+    private Object graplock = new Object();
 
     delegate void DelUpdateImage(Bitmap bmp);
 
     public void StartWebcam()
     {
+      if(cap == null)
+      {
+        cap = new Capture(0);
+      }
+
       draw = true;
-      cap = new Capture(0);
-
-      SizeMode = PictureBoxSizeMode.Zoom;
-
+      //SizeMode = PictureBoxSizeMode.Zoom;
       CaptureThread = new Thread(CapThreadFunction);
-      cap.ImageGrabbed += new EventHandler(imageGrabbed);
+      cap.ImageGrabbed += (imageGrabbed);
 
       CaptureThread.Start();
     }
@@ -41,9 +44,9 @@ namespace SYF_Client.Controls
     public void StopWebcam()
     {
       draw = false;
-      cap.ImageGrabbed -= new EventHandler(imageGrabbed);
+      cap.ImageGrabbed -= imageGrabbed;
       cap.Stop();
-      CaptureThread.Suspend();
+      CaptureThread.Abort();
     }
 
     public Byte[] takePic()
@@ -51,7 +54,6 @@ namespace SYF_Client.Controls
       MemoryStream m = new MemoryStream();
       lock (synclock)
       {
-        // Thread.Sleep(1000);
         secureBmp.Save(m, System.Drawing.Imaging.ImageFormat.Jpeg);
         m.Close();
       }
@@ -62,8 +64,7 @@ namespace SYF_Client.Controls
     {
       if (draw)
       {
-        Image = bmp;
-
+        Image = (Bitmap)bmp.Clone();
         cap.Stop();
         Refresh();
       }
@@ -73,20 +74,23 @@ namespace SYF_Client.Controls
     {
       try
       {
-        using (var frame = ((Capture)sender).RetrieveBgrFrame().Copy())
+        lock (graplock)
         {
-          using (Bitmap bmp = frame.ToBitmap())
+          using (var frame = ((Capture)sender).RetrieveBgrFrame().Copy())
           {
-            lock (synclock)
+            using (Bitmap bmp = frame.ToBitmap())
             {
-              secureBmp = (Bitmap)bmp.Clone();
-              if (InvokeRequired)
+              lock (synclock)
               {
-                Invoke(new DelUpdateImage(UpdateImage), bmp);
-              }
-              else
-              {
-                UpdateImage(bmp);
+                secureBmp = (Bitmap)bmp.Clone();
+                if (InvokeRequired)
+                {
+                  Invoke(new DelUpdateImage(UpdateImage), bmp);
+                }
+                else
+                {
+                  UpdateImage(bmp);
+                }
               }
             }
           }
@@ -94,7 +98,7 @@ namespace SYF_Client.Controls
       }
       catch (Exception ex)
       {
-        
+
       }
     }
 
@@ -106,7 +110,7 @@ namespace SYF_Client.Controls
 
       cap.Start();
 
-      while (true)
+      while (draw)
       {
         cap.Grab();
         Thread.Sleep(1000 / Framerate);

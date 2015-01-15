@@ -26,24 +26,8 @@ namespace SYF_Client
 
       // get current username
       UserName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-
-      SystemEvents.SessionSwitch += SystemEvents_SessionSwitch;
-
-
+      
       SingleInstance();
-    }
-
-    void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)
-    {
-      // Application.Restart();
-      if (e.Reason == SessionSwitchReason.SessionLock)
-      {
-        System.Windows.Forms.MessageBox.Show("SessionLock");
-      }
-      if (e.Reason == SessionSwitchReason.SessionUnlock)
-      {
-        System.Windows.Forms.MessageBox.Show("SessionUnlock");
-      }
     }
 
     // verify user by fingerprint
