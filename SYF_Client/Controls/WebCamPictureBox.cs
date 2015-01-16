@@ -80,17 +80,14 @@ namespace SYF_Client.Controls
           {
             using (Bitmap bmp = frame.ToBitmap())
             {
-              lock (synclock)
+              secureBmp = (Bitmap)bmp.Clone();
+              if (InvokeRequired)
               {
-                secureBmp = (Bitmap)bmp.Clone();
-                if (InvokeRequired)
-                {
-                  Invoke(new DelUpdateImage(UpdateImage), bmp);
-                }
-                else
-                {
-                  UpdateImage(bmp);
-                }
+                Invoke(new DelUpdateImage(UpdateImage), bmp);
+              }
+              else
+              {
+                UpdateImage(bmp);
               }
             }
           }

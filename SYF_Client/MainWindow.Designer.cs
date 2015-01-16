@@ -120,8 +120,7 @@
       this.Name = "MainWindow";
       this.ShowIcon = false;
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-      this.Text = "Form1";
-      this.TopMost = true;
+      this.Text = "SYF";
       this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainWindow_FormClosing);
       this.Resize += new System.EventHandler(this.MainWindow_Resize);
       this.tableLayoutPanel1.ResumeLayout(false);

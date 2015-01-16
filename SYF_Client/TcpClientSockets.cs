@@ -4,6 +4,7 @@ using SYF_Client.Properties;
 using SYF_Server.Messages;
 using System;
 using System.Drawing;
+using System.IO;
 using System.Net.Sockets;
 
 namespace SYF_Client
@@ -67,16 +68,15 @@ namespace SYF_Client
         Initialize();
 
         String responseData = String.Empty;
-        Byte[] data = System.Text.Encoding.ASCII.GetBytes(msg);
-        Int32 bytes;
 
         // Write Stream
-        stream.Write(data, 0, data.Length);
+        StreamWriter Writer = new StreamWriter(stream);
+        Writer.WriteLine(msg);
+        Writer.Flush();
 
         // Read Result
-        data = new Byte[32];
-        bytes = stream.Read(data, 0, data.Length);
-        responseData = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
+        StreamReader Reader = new StreamReader(stream);
+        responseData = Reader.ReadLine();
 
         // Close everything.
         stream.Close();

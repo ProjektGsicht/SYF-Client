@@ -37,9 +37,11 @@ namespace SYF_Client
       InitializeComponent();
       
       // No Borders
-      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-      this.WindowState = FormWindowState.Maximized;
-      this.Bounds = Screen.FromControl(this).Bounds;
+      //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+      //this.WindowState = FormWindowState.Maximized;
+      //this.Bounds = Screen.FromControl(this).Bounds;
+      //this.TopMost = true;
+      //this.ShowInTaskbar = false;
 
       // Initialize Runtime
       Runtime = new Runtime();
