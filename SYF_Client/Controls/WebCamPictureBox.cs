@@ -27,7 +27,7 @@ namespace SYF_Client.Controls
 
     // lock to avoid memory error
     Bitmap secureBmp;
-    bool draw; // falls sich größe von fenster verändert
+    public bool draw; // falls sich größe von fenster verändert
 
     private Object synclock = new Object();
     private Object graplock = new Object();
@@ -36,7 +36,7 @@ namespace SYF_Client.Controls
 
     public void StartWebcam()
     {
-      if(cap == null)
+      if (cap == null)
       {
         cap = new Capture(0);
       }
@@ -47,6 +47,7 @@ namespace SYF_Client.Controls
 
       CaptureThread.Start();
       log.Debug("webcam is started");
+
     }
 
     public void StopWebcam()
@@ -55,6 +56,8 @@ namespace SYF_Client.Controls
       cap.ImageGrabbed -= imageGrabbed;
       cap.Stop();
       CaptureThread.Abort();
+      cap.Dispose();
+      CaptureThread.DisableComObjectEagerCleanup();
       log.Debug("webcam is closed");
     }
 

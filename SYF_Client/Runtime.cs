@@ -15,19 +15,17 @@ namespace SYF_Client
     private static readonly ILog log =
                       LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.Name);
 
-    public OpenCV OpenCV;
     public TcpClientSockets TcpSockets;
 
     public String UserName;
 
     public void InitializeRuntime()
     { 
-      //OpenCV = new OpenCV();
       TcpSockets = new TcpClientSockets();
 
       // get current username
       UserName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-        
+
       SingleInstance();
     }
 

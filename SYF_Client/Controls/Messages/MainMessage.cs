@@ -41,6 +41,7 @@ namespace SYF_Client.Controls
       InitializeComponent();
       Type = type;
 
+
       // reset mainMessage
       btnCancel.Text = "Abbrechen";
       tlpMainMessage.RowStyles[2].Height = 0;
@@ -68,7 +69,11 @@ namespace SYF_Client.Controls
           break;
         case MessageType.EnrollmentSuccess:
           lblMessage.Text = "Verifizieren Sie sich nun über die Webcam!";
-          btnCancel.Text = "OK";
+          btnCancel.Text = "Ok";
+          break;
+        case MessageType.EnrollmentError:
+          lblMessage.Text = "Irgendwas ging schief versuchen Sie es nochmal!";
+          btnCancel.Text = "Ok";
           break;
         default:
           lblMessage.Text = "Bitte einen moment Geduld";

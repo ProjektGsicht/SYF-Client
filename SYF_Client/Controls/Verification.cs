@@ -12,6 +12,7 @@ namespace SYF_Client.Controls
 {
   public partial class Verification : UserControl
   {
+    // logging
     private static readonly ILog log =
                         LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.Name);
 
@@ -23,20 +24,10 @@ namespace SYF_Client.Controls
       InitializeComponent();
     }
 
-    public void StartWebcam()
-    {
-      picBox.StartWebcam();
-    }
-
     // start verification with faceimage
     private void btnPic_Click(object sender, EventArgs e)
     {
-      var messageControl = new MainMessage(SYF_Server.Messages.MessageType.FaceImage);
-      MainWindow.ShowMessage(messageControl);
-
-      Update();
-
-      MainWindow.UnlockWindows(MainWindow.Runtime.VerifiyUserByPic(picBox.takePic()));
+      MainWindow.UnlockWindows(MainWindow.Runtime.VerifiyUserByPic(MainWindow.picBox.takePic()));
     }
 
     // start verification with password
@@ -51,7 +42,5 @@ namespace SYF_Client.Controls
     {
       MainWindow.ChangeToUserEnrollment();
     }
-
-
   }
 }

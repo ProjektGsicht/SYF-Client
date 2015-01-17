@@ -13,6 +13,7 @@ using System.Diagnostics;
 using Microsoft.Win32;
 using SYF_Server.Messages;
 
+
 namespace SYF_Client
 {
   public partial class MainWindow : Form
@@ -34,83 +35,63 @@ namespace SYF_Client
 
     delegate void ChangeContentCallback(UserControl content);
 
+    readonly KeyboardFilter kbFilter = new KeyboardFilter(new Keys[] 
+        { 
+          //Keys.Control | Keys.Shift | Keys.Escape,
+          //Keys.Alt | Keys.Tab,
+          //Keys.LWin | Keys.D,
+          //Keys.RWin | Keys.D, 
+          //Keys.LWin | Keys.X, 
+          //Keys.RWin | Keys.X,
+          //Keys.Alt | Keys.F4,
+        });
+
     public MainWindow()
     {
       InitializeLogging(Settings.Default.LogFilePath);
       isActive = true;
       SystemEvents.SessionSwitch += SystemEvents_SessionSwitch;
       InitializeComponent();
-      
+      Autostart();
+
       // No Borders
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
       this.WindowState = FormWindowState.Maximized;
-      this.Bounds = Screen.FromControl(this).Bounds;
-      this.TopMost = true;
-      this.ShowInTaskbar = false;
+      //this.Bounds = Screen.FromControl(this).Bounds;
+      //this.TopMost = true;
+      //this.ShowInTaskbar = false;
 
       InitializeControls();
 
       // Initialize Runtime
-
       Runtime = new Runtime();
       Runtime.InitializeRuntime();
 
       ValidationResponseMessage msg = Runtime.TcpSockets.UserMessage("", "", Runtime.UserName, null);
-
-      if (true)//msg.Success)
+#warning server response
+      if (false)//msg.Success)
       {
-        ChangeContent(Verification);
-        Verification.StartWebcam();     
+        ChangeToVerification();
       }
       else
       {
-        ChangeContent(UserEnrollment);
-        UserEnrollment.StartWebcam();
+        ChangeToUserEnrollment();
       }
+      picBox.StartWebcam();
       ContextMenue();
     }
 
-    public void InitializeControls() 
+    #region Initialize
+    public void InitializeControls()
     {
       Verification = new Verification(this);
       Verification.Dock = DockStyle.Fill;
       Verification.Visible = true;
+
       UserEnrollment = new UserEnrollment(this);
       UserEnrollment.Dock = DockStyle.Fill;
       UserEnrollment.Visible = true;
     }
-
-    public void ChangeContent(UserControl content)
-    {
-      if (pnContent.InvokeRequired)
-      {
-        ChangeContentCallback c = new ChangeContentCallback(ChangeContent);
-        Invoke(c, content);
-      }
-      else
-      {
-        pnContent.Controls.Clear();
-        pnContent.Controls.Add(content);
-      }
-    }
-
-    public void ChangeToUserEnrollment()
-    { 
-      ChangeContent(UserEnrollment);
-      UserEnrollment.StartWebcam();
-    }
-
-    // filter keys
-    readonly KeyboardFilter kbFilter = new KeyboardFilter(new Keys[] 
-        { 
-          //Keys.Control | Keys.Shift | Keys.Escape,
-          Keys.Alt | Keys.Tab,
-          Keys.LWin | Keys.D,
-          Keys.RWin | Keys.D, 
-          Keys.LWin | Keys.X, 
-          Keys.RWin | Keys.X,
-          Keys.Alt | Keys.F4,
-        });
 
     // logging
     public static void InitializeLogging(string logDirectory)
@@ -166,24 +147,76 @@ namespace SYF_Client
         }
       }
     }
+    #endregion Initialize
 
-    // unlock windows
-    public void UnlockWindows(string response)
+    #region Autostart
+    private void Autostart()
     {
-      HideMessage();
-      
-      if (!string.IsNullOrEmpty(response))
+      var sourcePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\SYF_Client.appref-ms";
+      var destinationPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\SYF_Client.appref-ms";
+
+      if (File.Exists(destinationPath))
       {
-        WindowState = FormWindowState.Minimized;
-        log.Debug("Windows Unlocked");
+        File.Delete(destinationPath);
+      }
+
+      if (!File.Exists(sourcePath))
+      {
+        CreateShortcutOnDesktop();
+      }
+      File.Copy(sourcePath, destinationPath);
+    }
+
+    private static void CreateShortcutOnDesktop()
+    {
+      Assembly code = Assembly.GetExecutingAssembly();
+
+      AssemblyDescriptionAttribute asdescription = (AssemblyDescriptionAttribute)Attribute.GetCustomAttribute(code,
+                                                    typeof(AssemblyDescriptionAttribute));
+
+      AssemblyCompanyAttribute ascompany = (AssemblyCompanyAttribute)Attribute.GetCustomAttribute(code,
+                                            typeof(AssemblyCompanyAttribute));
+
+      string description = asdescription.Description;
+      string company = ascompany.Company;
+      string desktopPath = string.Concat(Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                                      "\\", description, ".appref-ms");
+
+      string shortcutName = string.Empty;
+      shortcutName = string.Concat(Environment.GetFolderPath(Environment.SpecialFolder.Programs),
+          "\\", company, "\\", description, ".appref-ms");
+
+      File.Copy(shortcutName, desktopPath, true);
+    }
+    #endregion
+
+    #region ContentChanger
+    public void ChangeContent(UserControl content)
+    {
+      if (pnContent.InvokeRequired)
+      {
+        ChangeContentCallback c = new ChangeContentCallback(ChangeContent);
+        Invoke(c, content);
       }
       else
       {
-        var messageControl = new MainMessage(SYF_Server.Messages.MessageType.Error);
-        log.DebugFormat("Windows locked. ServerResponse :{0}", response);
+        pnContent.Controls.Clear();
+        pnContent.Controls.Add(content);
       }
     }
 
+    public void ChangeToUserEnrollment()
+    { 
+      ChangeContent(UserEnrollment);
+    }
+
+    public void ChangeToVerification()
+    {
+      ChangeContent(Verification);
+    }
+#endregion
+
+    #region Messages
     // close current message
     public void HideMessage()
     {
@@ -192,7 +225,7 @@ namespace SYF_Client
         Controls.Remove(MessageControl);
         MessageControl = null;
 
-        //Update();
+        Update();
       }
     }
 
@@ -206,7 +239,7 @@ namespace SYF_Client
       msg.MessageOk += msg_MessageOk;
 
       msg.Left = (this.ClientSize.Width - msg.Width) / 2;
-      msg.Top = this.ClientSize.Height - msg.Height;
+      msg.Top = this.ClientSize.Height - msg.Height - 20;
 
       msg.BringToFront();
       msg.Focus();
@@ -236,23 +269,9 @@ namespace SYF_Client
         ChangeContent(Verification);
       }
     }
+    #endregion
 
-    // form to tray notification
-    private void MainWindow_Resize(object sender, EventArgs e)
-    {
-      if (FormWindowState.Minimized == this.WindowState)
-      {
-        KeyboardFilter.isMinimized = true;
-        notifyIcon.Visible = true;
-        this.Hide();
-      }
-      else if (FormWindowState.Normal == this.WindowState || FormWindowState.Maximized == this.WindowState)
-      {
-        notifyIcon.Visible = false;
-        KeyboardFilter.isMinimized = false;
-      }
-    }
-
+    #region Context Menu
     private void ContextMenue()
     {
       this.notifyIcon.Icon = SystemIcons.Application;
@@ -284,16 +303,17 @@ namespace SYF_Client
     void stateItem_Click(object sender, EventArgs e)
     {
       MenuItem stateItem = sender as MenuItem;
-      
+
       if (isActive)
       {
-        stateItem.Text = "Deaktivieren";
-        isActive = true;
+        stateItem.Text = "Aktivieren";
+
+        isActive = false;
       }
       else
       {
-        stateItem.Text = "Aktivieren";
-        isActive = false;
+        stateItem.Text = "Deaktivieren";
+        isActive = true;
       }
     }
 
@@ -313,7 +333,43 @@ namespace SYF_Client
     {
       this.Show();
       this.WindowState = FormWindowState.Maximized;
-      //picBox.StartWebcam();
+    }
+    #endregion
+
+    // unlock windows
+    public void UnlockWindows(string response)
+    {
+      HideMessage();
+#warning server response
+      if (true)
+      {
+        WindowState = FormWindowState.Minimized;
+        log.Debug("Windows Unlocked");
+      }
+      else
+      {
+        var messageControl = new MainMessage(SYF_Server.Messages.MessageType.Error);
+        ShowMessage(messageControl);
+        log.DebugFormat("Windows locked. ServerResponse :{0}", response);
+      }
+    }
+
+    // form to tray notification
+    private void MainWindow_Resize(object sender, EventArgs e)
+    {
+      if (FormWindowState.Minimized == this.WindowState)
+      {
+        KeyboardFilter.isMinimized = true;
+        notifyIcon.Visible = true;
+        //picBox.StopWebcam();
+        this.Hide();
+      }
+      else if (FormWindowState.Normal == this.WindowState || FormWindowState.Maximized == this.WindowState)
+      {
+        //picBox.StartWebcam();
+        notifyIcon.Visible = false;
+        KeyboardFilter.isMinimized = false;
+      }
     }
 
     private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
