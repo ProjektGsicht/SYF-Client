@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using SYF_Server.Messages;
 
 namespace SYF_Client
 {
@@ -17,7 +18,7 @@ namespace SYF_Client
     public OpenCV OpenCV;
     public TcpClientSockets TcpSockets;
 
-    String UserName;
+    public String UserName;
 
     public void InitializeRuntime()
     { 
@@ -26,8 +27,13 @@ namespace SYF_Client
 
       // get current username
       UserName = System.Security.Principal.WindowsIdentity.GetCurrent().Name;
-      
+        
       SingleInstance();
+    }
+
+    public Message SendEnrollment(string username, string password, Byte[] bmt)
+    {
+      return TcpSockets.UserMessage(username, password, UserName, bmt);
     }
 
     // verify user by fingerprint

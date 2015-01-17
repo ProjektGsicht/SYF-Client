@@ -11,6 +11,7 @@ using SYF_Client.Controls;
 using System.Drawing;
 using System.Diagnostics;
 using Microsoft.Win32;
+using SYF_Server.Messages;
 
 namespace SYF_Client
 {
@@ -22,13 +23,17 @@ namespace SYF_Client
                             LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.Name);
 
     public Runtime Runtime { get; set; }
+    public Verification Verification { get; set; }
+    public UserEnrollment UserEnrollment { get; set; }
 
     private UserControl MessageControl { get; set; }
-    private Message Message { get; set; }
+    private System.Windows.Forms.Message Message { get; set; }
 
     private NotifyIcon notifyIcon = new NotifyIcon();
     private bool isActive;
- 
+
+    delegate void ChangeContentCallback(UserControl content);
+
     public MainWindow()
     {
       InitializeLogging(Settings.Default.LogFilePath);
@@ -37,28 +42,74 @@ namespace SYF_Client
       InitializeComponent();
       
       // No Borders
-      //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-      //this.WindowState = FormWindowState.Maximized;
-      //this.Bounds = Screen.FromControl(this).Bounds;
-      //this.TopMost = true;
-      //this.ShowInTaskbar = false;
+      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+      this.WindowState = FormWindowState.Maximized;
+      this.Bounds = Screen.FromControl(this).Bounds;
+      this.TopMost = true;
+      this.ShowInTaskbar = false;
+
+      InitializeControls();
 
       // Initialize Runtime
+
       Runtime = new Runtime();
       Runtime.InitializeRuntime();
 
-      picBox.StartWebcam();
+      ValidationResponseMessage msg = Runtime.TcpSockets.UserMessage("", "", Runtime.UserName, null);
+
+      if (true)//msg.Success)
+      {
+        ChangeContent(Verification);
+        Verification.StartWebcam();     
+      }
+      else
+      {
+        ChangeContent(UserEnrollment);
+        UserEnrollment.StartWebcam();
+      }
       ContextMenue();
+    }
+
+    public void InitializeControls() 
+    {
+      Verification = new Verification(this);
+      Verification.Dock = DockStyle.Fill;
+      Verification.Visible = true;
+      UserEnrollment = new UserEnrollment(this);
+      UserEnrollment.Dock = DockStyle.Fill;
+      UserEnrollment.Visible = true;
+    }
+
+    public void ChangeContent(UserControl content)
+    {
+      if (pnContent.InvokeRequired)
+      {
+        ChangeContentCallback c = new ChangeContentCallback(ChangeContent);
+        Invoke(c, content);
+      }
+      else
+      {
+        pnContent.Controls.Clear();
+        pnContent.Controls.Add(content);
+      }
+    }
+
+    public void ChangeToUserEnrollment()
+    { 
+      ChangeContent(UserEnrollment);
+      UserEnrollment.StartWebcam();
     }
 
     // filter keys
     readonly KeyboardFilter kbFilter = new KeyboardFilter(new Keys[] 
         { 
-            Keys.LWin | Keys.D,
-            Keys.RWin | Keys.D, 
-            Keys.LWin | Keys.X, 
-            Keys.RWin | Keys.X,
-            Keys.Alt | Keys.F4
+          //Keys.Control | Keys.Shift | Keys.Escape,
+          Keys.Alt | Keys.Tab,
+          Keys.LWin | Keys.D,
+          Keys.RWin | Keys.D, 
+          Keys.LWin | Keys.X, 
+          Keys.RWin | Keys.X,
+          Keys.Alt | Keys.F4,
         });
 
     // logging
@@ -117,48 +168,20 @@ namespace SYF_Client
     }
 
     // unlock windows
-    private void UnlockWindows(string response)
+    public void UnlockWindows(string response)
     {
       HideMessage();
       
-      if (string.IsNullOrEmpty(response))
+      if (!string.IsNullOrEmpty(response))
       {
-        picBox.StopWebcam();
         WindowState = FormWindowState.Minimized;
+        log.Debug("Windows Unlocked");
       }
       else
       {
         var messageControl = new MainMessage(SYF_Server.Messages.MessageType.Error);
+        log.DebugFormat("Windows locked. ServerResponse :{0}", response);
       }
-    }
-
-    // verification with fingerprint
-    private void btnFingerprint_Click(object sender, EventArgs e)
-    {
-      // start fingerprint
-      var messageControl = new MainMessage(SYF_Server.Messages.MessageType.Fingerprint);
-      ShowMessage(messageControl);
-
-      Update();
-
-    }
-
-    // start verification with faceimage
-    private void btnPic_Click(object sender, EventArgs e)
-    {
-      var messageControl = new MainMessage(SYF_Server.Messages.MessageType.FaceImage);
-      ShowMessage(messageControl);
-
-      Update();
-
-      UnlockWindows(Runtime.VerifiyUserByPic(picBox.takePic()));
-    }
-
-    // start verification with password
-    private void btnPassword_Click(object sender, EventArgs e)
-    {
-      var messageControl = new MainMessage(SYF_Server.Messages.MessageType.Text);
-      ShowMessage(messageControl);
     }
 
     // close current message
@@ -195,15 +218,23 @@ namespace SYF_Client
       HideMessage();
 
       var mainMessage = (MainMessage)sender;
-      UnlockWindows(Runtime.VerifiyUserByPassword(mainMessage.Password));
 
-      var messageControl = new MainMessage(0);
-      ShowMessage(messageControl);
+      if (mainMessage.Type == MessageType.Text)
+      {
+        UnlockWindows(Runtime.VerifiyUserByPassword(mainMessage.Password));
+      }
     }
 
     void msg_MessageCancel(object sender)
     {
       HideMessage();
+
+      var mainMessage = (MainMessage)sender;
+
+      if (mainMessage.Type == MessageType.EnrollmentSuccess)
+      {
+        ChangeContent(Verification);
+      }
     }
 
     // form to tray notification
@@ -213,7 +244,6 @@ namespace SYF_Client
       {
         KeyboardFilter.isMinimized = true;
         notifyIcon.Visible = true;
-        //notifyIcon.ShowBalloonTip(500);
         this.Hide();
       }
       else if (FormWindowState.Normal == this.WindowState || FormWindowState.Maximized == this.WindowState)
@@ -225,7 +255,6 @@ namespace SYF_Client
 
     private void ContextMenue()
     {
-      //this.notifyIcon.Icon = ((System.Drawing.Icon)(Resources.ResourceManager.GetObject("logo_header.png")));
       this.notifyIcon.Icon = SystemIcons.Application;
 
       ContextMenu cm = new ContextMenu();
@@ -284,7 +313,7 @@ namespace SYF_Client
     {
       this.Show();
       this.WindowState = FormWindowState.Maximized;
-      picBox.StartWebcam();
+      //picBox.StartWebcam();
     }
 
     private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)

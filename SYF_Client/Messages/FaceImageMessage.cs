@@ -30,8 +30,6 @@ namespace SYF_Server.Messages
             set
             {
               InternalData = value;
-              //MemoryStream ms = new MemoryStream(value);
-              //Image returnImage = Image.FromStream(ms);
             }
         }
 

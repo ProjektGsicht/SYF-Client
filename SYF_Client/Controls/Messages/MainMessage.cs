@@ -8,11 +8,16 @@ using System.Text;
 using System.Windows.Forms;
 using SYF_Client.Controls.Messages;
 using SYF_Server.Messages;
+using log4net;
 
 namespace SYF_Client.Controls
 {
   public partial class MainMessage : UserControl
   {
+    // logging
+    private static readonly ILog log =
+                        LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.Name);
+
     public string Password;
     public MessageType Type;
 
@@ -35,27 +40,36 @@ namespace SYF_Client.Controls
     {
       InitializeComponent();
       Type = type;
+
+      // reset mainMessage
       btnCancel.Text = "Abbrechen";
       tlpMainMessage.RowStyles[2].Height = 0;
       tbPassword.Visible = false;
+      btnSend.Visible = false;
 
       // set messagetype 
       switch (type)
       {
         case MessageType.FaceImage:
-          lblMessage.Text = "Einen moment Geduld ihr Bild wird überprüft";
+          lblMessage.Text = "Einen moment Geduld ihr Bild wird überprüft.";
           break;
         case MessageType.Fingerprint:
-          lblMessage.Text = "Bitte fahren Sie mit dem Finger über den Sensor";
+          lblMessage.Text = "Bitte fahren Sie mit dem Finger über den Sensor.";
           break;
         case MessageType.Text:
+          lblMessage.Text = "Geben Sie nun Ihr Password ein.";
           this.tlpMainMessage.RowStyles[2].Height = 35;
           tbPassword.Visible = true;
+          btnSend.Visible = true;
           break;
         case MessageType.Error:
           lblMessage.Text = "Authentifizierung fehlgeschlagen";
           btnCancel.Text = "Ok";
-          break;       
+          break;
+        case MessageType.EnrollmentSuccess:
+          lblMessage.Text = "Verifizieren Sie sich nun über die Webcam!";
+          btnCancel.Text = "OK";
+          break;
         default:
           lblMessage.Text = "Bitte einen moment Geduld";
           break;

@@ -1,4 +1,5 @@
 ﻿using Emgu.CV;
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,14 +13,21 @@ namespace SYF_Client.Controls
 {
   public class WebCamPictureBox : PictureBox
   {
+    // logging
+    private static readonly ILog log =
+                        LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.Name);
+
+    // webcam properties
     Capture cap;
     Thread CaptureThread;
 
-    Bitmap secureBmp;
-    bool draw; // falls sich größe von fenster verändert
     private const int Framerate = 30;
     private const int Framewidth = 1920;
     private const int Frameheight = 1080;
+
+    // lock to avoid memory error
+    Bitmap secureBmp;
+    bool draw; // falls sich größe von fenster verändert
 
     private Object synclock = new Object();
     private Object graplock = new Object();
@@ -34,11 +42,11 @@ namespace SYF_Client.Controls
       }
 
       draw = true;
-      //SizeMode = PictureBoxSizeMode.Zoom;
       CaptureThread = new Thread(CapThreadFunction);
       cap.ImageGrabbed += (imageGrabbed);
 
       CaptureThread.Start();
+      log.Debug("webcam is started");
     }
 
     public void StopWebcam()
@@ -47,6 +55,7 @@ namespace SYF_Client.Controls
       cap.ImageGrabbed -= imageGrabbed;
       cap.Stop();
       CaptureThread.Abort();
+      log.Debug("webcam is closed");
     }
 
     public Byte[] takePic()
@@ -54,6 +63,7 @@ namespace SYF_Client.Controls
       MemoryStream m = new MemoryStream();
       lock (synclock)
       {
+        log.Debug("synclock to take picture");
         secureBmp.Save(m, System.Drawing.Imaging.ImageFormat.Jpeg);
         m.Close();
       }
@@ -76,14 +86,18 @@ namespace SYF_Client.Controls
       {
         lock (graplock)
         {
+          log.Debug("lock to grap pic");
           using (var frame = ((Capture)sender).RetrieveBgrFrame().Copy())
           {
             using (Bitmap bmp = frame.ToBitmap())
             {
               secureBmp = (Bitmap)bmp.Clone();
+              log.Debug("bmp created");
               if (InvokeRequired)
               {
+                log.Debug("UpdateImgage InvokeRequired");
                 Invoke(new DelUpdateImage(UpdateImage), bmp);
+
               }
               else
               {
@@ -95,7 +109,7 @@ namespace SYF_Client.Controls
       }
       catch (Exception ex)
       {
-
+        log.DebugFormat("ImageGrabbed: {0}", ex.Message);
       }
     }
 

@@ -25,6 +25,17 @@ namespace SYF_Client
       stream = client.GetStream();      
     }
 
+    public ValidationResponseMessage UserMessage(string user, string password, string pcUser, Byte[] bmp)
+    {
+      NewInfoMessage newMessage = new NewInfoMessage();
+      newMessage.Username = user;
+      newMessage.Password = password;
+      newMessage.WindowsUser = pcUser;
+      newMessage.InternalDataFaceImage = bmp;
+
+      return JsonHelper.Deserialize<ValidationResponseMessage>(WriteMessage(JsonHelper.Serialize<NewInfoMessage>(newMessage)));
+    }
+
     public string FaceMessage(string user, Byte[] bmp)
     {
       FaceImageMessage msg = new FaceImageMessage()
