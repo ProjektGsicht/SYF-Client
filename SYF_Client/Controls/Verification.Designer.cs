@@ -76,7 +76,7 @@
       this.btnPassword.Name = "btnPassword";
       this.btnPassword.Size = new System.Drawing.Size(84, 34);
       this.btnPassword.TabIndex = 3;
-      this.btnPassword.Text = "password";
+      this.btnPassword.Text = "Password";
       this.btnPassword.UseVisualStyleBackColor = true;
       this.btnPassword.Click += new System.EventHandler(this.btnPassword_Click);
       // 
@@ -87,7 +87,7 @@
       this.btnPic.Name = "btnPic";
       this.btnPic.Size = new System.Drawing.Size(84, 34);
       this.btnPic.TabIndex = 2;
-      this.btnPic.Text = "take photo";
+      this.btnPic.Text = "Picture";
       this.btnPic.UseVisualStyleBackColor = true;
       this.btnPic.Click += new System.EventHandler(this.btnPic_Click);
       // 

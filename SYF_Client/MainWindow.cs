@@ -69,7 +69,7 @@ namespace SYF_Client
 
       ValidationResponseMessage msg = Runtime.TcpSockets.UserMessage("", "", Runtime.UserName, null);
 #warning server response
-      if (false)//msg.Success)
+      if (msg.Success)
       {
         ChangeToVerification();
       }
@@ -150,21 +150,22 @@ namespace SYF_Client
     #endregion Initialize
 
     #region Autostart
+
     private void Autostart()
     {
-      var sourcePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\SYF_Client.appref-ms";
-      var destinationPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\SYF_Client.appref-ms";
+      //var sourcePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\SYF_Client.appref-ms";
+      //var destinationPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\SYF_Client.appref-ms";
 
-      if (File.Exists(destinationPath))
-      {
-        File.Delete(destinationPath);
-      }
+      //if (File.Exists(destinationPath))
+      //{
+      //  File.Delete(destinationPath);
+      //}
 
-      if (!File.Exists(sourcePath))
-      {
-        CreateShortcutOnDesktop();
-      }
-      File.Copy(sourcePath, destinationPath);
+      //if (!File.Exists(sourcePath))
+      //{
+      //  CreateShortcutOnDesktop();
+      //}
+      //File.Copy(sourcePath, destinationPath);
     }
 
     private static void CreateShortcutOnDesktop()
@@ -272,6 +273,7 @@ namespace SYF_Client
     #endregion
 
     #region Context Menu
+
     private void ContextMenue()
     {
       this.notifyIcon.Icon = SystemIcons.Application;
@@ -319,7 +321,7 @@ namespace SYF_Client
 
     void webpage_Click(object sender, EventArgs e)
     {
-      Process.Start("http://google.com");
+      Process.Start(Settings.Default.Webpage);
     }
 
     void closeItem_Click(object sender, EventArgs e)
@@ -337,12 +339,13 @@ namespace SYF_Client
     #endregion
 
     // unlock windows
-    public void UnlockWindows(string response)
+    public void UnlockWindows(ValidationResponseMessage response)
     {
       HideMessage();
-#warning server response
-      if (true)
+
+      if (response.Success)
       {
+        picBox.StopWebcam();
         WindowState = FormWindowState.Minimized;
         log.Debug("Windows Unlocked");
       }
@@ -366,7 +369,7 @@ namespace SYF_Client
       }
       else if (FormWindowState.Normal == this.WindowState || FormWindowState.Maximized == this.WindowState)
       {
-        //picBox.StartWebcam();
+       // picBox.StartWebcam();
         notifyIcon.Visible = false;
         KeyboardFilter.isMinimized = false;
       }

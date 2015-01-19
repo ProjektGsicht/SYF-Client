@@ -49,5 +49,17 @@ namespace SYF_Client.Properties {
                 return ((int)(this["ServerPort"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Webpage {
+            get {
+                return ((string)(this["Webpage"]));
+            }
+            set {
+                this["Webpage"] = value;
+            }
+        }
     }
 }

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using log4net;
+using SYF_Server.Messages;
 
 namespace SYF_Client.Controls
 {
@@ -27,11 +28,11 @@ namespace SYF_Client.Controls
 
     private void btnSendEnrollment_Click(object sender, EventArgs e)
     {
-      SYF_Server.Messages.Message response = MainWindow.Runtime.SendEnrollment(tbUsername.Text, tbPassword.Text, MainWindow.picBox.takePic());
+      ValidationResponseMessage response = MainWindow.Runtime.SendEnrollment(tbUsername.Text, tbPassword.Text, MainWindow.picBox.takePic());
       
       counter = counter - 1;
 #warning server response
-      if (true)//response.success
+      if (response.Success)
       {
         lblInfo.Text = string.Format("Noch {0} Bilder", counter);
       }

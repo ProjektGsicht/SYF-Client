@@ -100,7 +100,6 @@ namespace SYF_Client.Controls
               {
                 log.Debug("UpdateImgage InvokeRequired");
                 Invoke(new DelUpdateImage(UpdateImage), bmp);
-
               }
               else
               {

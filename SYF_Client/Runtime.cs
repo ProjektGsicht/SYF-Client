@@ -29,7 +29,7 @@ namespace SYF_Client
       SingleInstance();
     }
 
-    public Message SendEnrollment(string username, string password, Byte[] bmt)
+    public ValidationResponseMessage SendEnrollment(string username, string password, Byte[] bmt)
     {
       return TcpSockets.UserMessage(username, password, UserName, bmt);
     }
@@ -42,14 +42,14 @@ namespace SYF_Client
     }
 
     // verify user by faceImage
-    public string VerifiyUserByPic(byte[] pic)
+    public ValidationResponseMessage VerifiyUserByPic(byte[] pic)
     {
       //return TcpSockets.FaceMessage(UserName, OpenCV.CreateBmp());
       return TcpSockets.FaceMessage(UserName, pic);
     }
 
     // verify by password
-    public string VerifiyUserByPassword(string password)
+    public ValidationResponseMessage VerifiyUserByPassword(string password)
     {
       return TcpSockets.PasswordMessage(UserName, password);
     }
